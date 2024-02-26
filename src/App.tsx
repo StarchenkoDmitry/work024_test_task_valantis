@@ -118,7 +118,7 @@ function App() {
 			</div>
 
 			<Pagination 
-				initPage={page} 
+				page={page} 
 				onPage={onPage}
 			/>
 

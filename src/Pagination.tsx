@@ -1,30 +1,24 @@
-import { useState } from 'react';
-
 
 interface Props {
-    initPage?:number;
+    page:number;
     onPage:(toPage:number)=>void;
 }
 
 function Pagination({
     onPage,
-    initPage
+    page,
 }: Props) {
 
-    const [page,setPage] = useState(initPage ?? 0);
-    
     const movePageOn = (count:number)=>{
-        setPage(prev=>{
-            const newPage = prev + count;
-            if (newPage >= 0){                
-                onPage(newPage);
-                return newPage;
-            }else{
-                
-                onPage(0);
-                return 0;
-            }
-        });
+        const newPage = page + count;
+        if (newPage >= 0){
+            onPage(newPage);
+            return newPage;
+        }else{
+            
+            onPage(0);
+            return 0;
+        }
     }
 
     return (
