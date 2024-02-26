@@ -66,7 +66,6 @@ function Pagination({
             <button className='btn_page' onClick={ ()=>movePageOn(1) }>
                 Next
             </button>
-            {/* <span>Current page: {page}</span> */}
         </div>
     );
 }

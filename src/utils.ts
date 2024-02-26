@@ -1,8 +1,9 @@
 import { Item } from "./types";
 
-export function uniqueItems(items:Item[]):Item[]
-{
+export function uniqueItems(items:Item[]):Item[]{
+    
     const newArray:Item[] = [];
+
     for (let i = 0; i < items.length; i++) {
         const element = items[i];
         if(newArray.findIndex((value)=>value.id === element.id) === -1){

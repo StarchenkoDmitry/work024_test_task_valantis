@@ -1,18 +1,8 @@
 import "./App.css";
-import { 
-	useEffect, 
-	useState 
-} from "react";
-import { 
-	NUMBER_OF_ITEMS_ON_PAGE,
-	getFilterOptions, 
-	getIds, 
-	getItems 
-} from "./api";
-import Pagination from "./Pagination";
+import { useEffect, useState } from "react";
 import { Item } from "./types";
-import { trimArray, uniqueItems } from "./utils";
-
+import { getIdsOption } from "./api";
+import Pagination from "./Pagination";
 
 function App() {
 
@@ -20,82 +10,59 @@ function App() {
 	const [isError, setIsError] = useState(false);
 	
 	const [page, setPage] = useState(0);
-
-	const [ids, setIds] = useState<string[]>([]);
 	const [items, setItems] = useState<Item[]>([]);
 
-	const [name, setName] = useState<string>("");
+	const [product, setProduct] = useState<string>("");
 	const [brand, setBrand] = useState<string>("");
 	const [price, setPrice] = useState<number>(0);
 
 
 	useEffect(() => {
+		const controller = new AbortController();
 		setIsLoading(true);
 		setIsError(false);
-		let doFetch = true;
+		let continueWork = true;
 
-		if(name.length > 0 || price !==0 || brand.length > 0){
-			getFilterOptions({
-				brand:brand.length > 0 ? brand : undefined,
-				product:name.length > 0 ? name : undefined,
-				price: price !== 0 ? price : undefined, 
-			}).then(res=>{
-				if(!doFetch)return;
+		async function task(){
+			let count_retry = 5;
+			while(continueWork && count_retry > 0){
+				console.log("count_retry: ",count_retry);
+				count_retry--;
 				
-				if (res) {
-					const uniqIds = [...new Set(res)];
-					setIds(trimArray(uniqIds,page * NUMBER_OF_ITEMS_ON_PAGE, NUMBER_OF_ITEMS_ON_PAGE));
-				} else {
-					setIds([]);
-					setIsLoading(false);
-					setIsError(true);
-				}
-			});
-		}else{
-			getIds(page * NUMBER_OF_ITEMS_ON_PAGE, NUMBER_OF_ITEMS_ON_PAGE)
-			.then((res) => {
-				if(!doFetch)return;
-	
-				if (res) {
-					setIds([...new Set(res)]);
-					setIsError(false);
-				}else{
-					setIds([]);
-					setIsError(true);
-				}
-				setIsLoading(false);
-			});
-		}
-		return ()=>{ doFetch = false; }
-	}, [page,name,price,brand]);
+				const newItems = await getIdsOption({
+					page, brand, price,product,
+					signal: controller.signal
+				});
 
-	useEffect(() => {
-		setIsLoading(true);
-		setIsError(false);
-		let doFetch = true;
-		
-		getItems(ids).then((res) => {
-			if(!doFetch)return;
-
-			if (res) {
-				setItems(uniqueItems(res));
-				setIsError(false);
-			} else {
-				setItems([]);
-				setIsError(true);
+				if(newItems){
+					if(continueWork){
+						setItems(newItems);
+						
+						setIsLoading(false);
+						setIsError(false);
+					}
+					return;
+				}
 			}
+			
 			setIsLoading(false);
-		});
+			setIsError(true);
+		}
+		task();
 
-		return ()=>{ doFetch = false; }
-	}, [ids]);
+		return ()=>{ 
+			continueWork = false;
+			controller.abort();
+		}
+
+	}, [page,product,price,brand]);
 
 	const onPage = (toPage:number) => {
 		setPage(toPage);
 	};
 
 	const changeName = (event: React.ChangeEvent<HTMLInputElement>)=>{
-		setName(event.target.value);
+		setProduct(event.target.value);
 
 		setBrand("");
 		setPrice(0);
@@ -105,7 +72,7 @@ function App() {
 	const changeBrand = (event: React.ChangeEvent<HTMLInputElement>)=>{
 		setBrand(event.target.value);
 
-		setName("");
+		setProduct("");
 		setPrice(0);
 		setPage(0);
 	};
@@ -113,7 +80,7 @@ function App() {
 	const changePrice = (event: React.ChangeEvent<HTMLInputElement>)=>{
 		setPrice(parseInt(event.target.value));
 		
-		setName("");
+		setProduct("");
 		setBrand("");
 		setPage(0);
 	};
@@ -129,7 +96,7 @@ function App() {
 						name="product" 
 						type="text"
 						onChange={changeName}
-						value={name}
+						value={product}
 					/>
 
 					<label htmlFor="brand">Brand</label>
