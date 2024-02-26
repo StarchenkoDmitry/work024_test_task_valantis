@@ -2,3 +2,16 @@
   padding: 0;
   margin: 0;
 }
+
+
+
+.pagination_container {
+  width: max-content;
+  margin: .25rem auto;
+}
+
+.btn_page{
+  margin: 0 .125rem;
+  padding: .25rem;
+  min-width: 2rem;
+}
