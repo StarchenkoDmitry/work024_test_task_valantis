@@ -2,7 +2,7 @@ import { GetIdsResponse, GetItemsResponse, Item } from './types';
 import { SECRET } from './secret';
 import { trimArray, uniqueItems } from './utils';
 
-const API_BASE = "https://api.valantis.store:40000";
+const API_BASE = "http://api.valantis.store:40000";
 
 export const NUMBER_OF_ITEMS_ON_PAGE = 50;
 
